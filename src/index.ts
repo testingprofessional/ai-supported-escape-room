@@ -39,7 +39,7 @@ function pakVoorwerp(voorwerp: string, escapeRoom: EscapeRoom): boolean {
 }
 
 function verwerkActie(actie: PlayerAction): string {
-    if(gameState.ontsnapt) {
+    if(gameState.ontsnapt && actie.type !== 'nieuw-spel') {
         return "Je bent al ontsnapt. Het spel is afgelopen.";
     }
 
@@ -76,6 +76,7 @@ function verwerkActie(actie: PlayerAction): string {
                         return resultaat;
         case "help": return "Deze actie wordt nog niet ondersteund.";
         case "nieuw-spel": startNieuwSpel();
+                           return "Er is een nieuw spel gestart.";
         default: return "Onbekende actie."
     }
 }
@@ -152,4 +153,9 @@ console.log(verwerkActie({
 console.log(verwerkActie({
     type: 'los-op',
     doel: 'Verborgen schakelaar'
+}));
+
+console.log(verwerkActie({
+    type: "nieuw-spel",
+    doel: ""
 }));
