@@ -39,6 +39,10 @@ function pakVoorwerp(voorwerp: string, escapeRoom: EscapeRoom): boolean {
 }
 
 function verwerkActie(actie: PlayerAction): string {
+    if(gameState.ontsnapt) {
+        return "Je bent al ontsnapt. Het spel is afgelopen.";
+    }
+
     switch(actie.type) {
         case "kijk": return escapeRoom.beschrijving;
         case "inventaris": const inventarisTekst: string = gameState.inventaris.length === 0
@@ -47,10 +51,13 @@ function verwerkActie(actie: PlayerAction): string {
 
                             return inventarisTekst;
         case "pak": const actieGeslaagd: boolean = pakVoorwerp(actie.doel, escapeRoom);
-                    if(actieGeslaagd) {
-                        return "Je hebt het voorwerp opgepakt."
-                    }
-                    return "Je kunt dit voorwerp niet oppakken."
+                        if(actieGeslaagd) {
+                            if(kanOntsnappen()) {
+                                    return controleerOntsnapping();
+                                }
+                            return "Je hebt het voorwerp opgepakt."
+                        }
+                        return "Je kunt dit voorwerp niet oppakken."
         case "los-op": const puzzel = escapeRoom.puzzels.find(
                             puzzel => puzzel.naam === actie.doel);
                         if(!puzzel) {
@@ -68,6 +75,7 @@ function verwerkActie(actie: PlayerAction): string {
                         }
                         return resultaat;
         case "help": return "Deze actie wordt nog niet ondersteund.";
+        case "nieuw-spel": startNieuwSpel();
         default: return "Onbekende actie."
     }
 }
@@ -95,8 +103,13 @@ function controleerOntsnapping(): string {
         gameState.ontsnapt = true;
         return "Je hebt alle puzzels opgelost en ontsnapt uit de kamer!";
     }
-
     return "Je kunt nog niet ontsnappen. Los alle puzzels op en verzamel de sleutel.";
+}
+
+function startNieuwSpel(): void {
+    gameState.inventaris = [];
+    gameState.ontsnapt = false;
+    escapeRoom.puzzels.forEach(puzzel => puzzel.opgelost = false);
 }
 
 // console.log(verwerkActie({ type: 'inventaris', doel: '' }));
