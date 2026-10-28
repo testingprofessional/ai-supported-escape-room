@@ -1,7 +1,8 @@
 import type { EscapeRoom } from './models/room.js';
-import type { PlayerAction } from './models/action.js';
 import type { GameState } from './models/game-state.js';
+import { beschrijfKamer } from './ai/room-narrator.js';
 import { verwerkActie } from './game/game-engine.js';
+import type { PlayerAction } from './models/action.js';
 
 const escapeRoom: EscapeRoom = {
     naam: 'De Vergeten Werkkamer',
@@ -17,47 +18,26 @@ const escapeRoom: EscapeRoom = {
                opgelost: false}]
 };
 
-const actie: PlayerAction = {
-    type: 'pak',
-    doel: 'Sleutel'
-};
-
 const gameState: GameState = {
     inventaris: [],
     ontsnapt: false
 }
 
-//test-cases
-console.log(verwerkActie({
-    type: 'los-op',
-    doel: 'Cijfercode',
-    antwoord: '1234'
-}, escapeRoom, gameState));
+let openingsBeschrijving = '';
 
-console.log(verwerkActie({
-    type: 'los-op',
-    doel: 'Cijfercode',
-    antwoord: '2580'
-}, escapeRoom, gameState));
+async function startSpel(actie: PlayerAction) {
+    openingsBeschrijving = await beschrijfKamer(escapeRoom);
 
-console.log(verwerkActie({
-    type: 'los-op',
-    doel: 'Cijfercode',
-    antwoord: '2580'
-}, escapeRoom, gameState));
+    const resultaat = verwerkActie(actie, escapeRoom, gameState);
 
-console.log(verwerkActie({
-    type: 'los-op',
-    doel: 'Geheime deur',
-    antwoord: '1234'
-}, escapeRoom, gameState));
+    if(actie.type === 'kijk') {
+        console.log(openingsBeschrijving);
+    } else {
+        console.log(resultaat);
+    }
+}
 
-console.log(verwerkActie({
-    type: 'los-op',
-    doel: 'Verborgen schakelaar'
-}, escapeRoom, gameState));
+startSpel({type: 'inventaris', doel: ''});
 
-console.log(verwerkActie({
-    type: "nieuw-spel",
-    doel: ""
-}, escapeRoom, gameState));
+
+
