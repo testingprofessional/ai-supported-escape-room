@@ -3,4 +3,5 @@ export interface Puzzle {
     beschrijving: string;
     oplossing: string;
     opgelost: boolean;
+    hints: string[];
 }

@@ -3,6 +3,7 @@ import type { GameState } from './models/game-state.js';
 import { beschrijfKamer } from './ai/room-narrator.js';
 import { verwerkActie } from './game/game-engine.js';
 import type { PlayerAction } from './models/action.js';
+import { genereerHint } from './ai/hint-generator.js';
 
 let openingsBeschrijving = '';
 
@@ -18,17 +19,24 @@ const escapeRoom: EscapeRoom = {
     puzzels: [{naam: 'Cijfercode',
                beschrijving: 'Een paneel vraagt om een viercijferige code.',
                oplossing: '2580',
-               opgelost: false},
+               opgelost: false,
+               hints: ['Onderzoek de voorwerpen zorgvuldig en let op details die je eerder over het hoofd zag.']},
               {naam: 'Verborgen schakelaar',
                beschrijving: 'Er zit ergens in de kamer een verborgen schakelaar.',
                oplossing: 'boekenkast',
-               opgelost: false}]
+               opgelost: false,
+               hints: []}]
 };
 
 async function verwerkSpelerActie(actie: PlayerAction) {
     if(actie.type === 'kijk') {
         if(openingsBeschrijving === '') {
-            openingsBeschrijving = await beschrijfKamer(escapeRoom);
+            try {
+                openingsBeschrijving = await beschrijfKamer(escapeRoom);
+            } catch {
+                console.warn('AI-beschrijving mislukt. De vaste beschrijving wordt gebruikt.');
+                openingsBeschrijving = escapeRoom.beschrijving;
+            }
         }
         console.log(openingsBeschrijving);
     } else {
@@ -46,8 +54,11 @@ async function startSpel(actie: PlayerAction) {
 
 async function main() {
     await startSpel({type: 'kijk', doel: ''});
-    await startSpel({type: 'kijk', doel: ''});
     await verwerkSpelerActie({type: 'inventaris', doel: ''});
+    const hint = await genereerHint(escapeRoom.puzzels[0]!);
+    console.log(hint);
+    await verwerkSpelerActie({type: 'help', doel: 'Cijfercode'});
+    await verwerkSpelerActie({type: 'help', doel: 'Bestaat_niet'});
 }
 
 main();

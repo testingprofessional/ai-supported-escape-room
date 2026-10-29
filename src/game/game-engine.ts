@@ -82,7 +82,12 @@ export function verwerkActie(actie: PlayerAction, escapeRoom: EscapeRoom, gameSt
                             }
                         }
                         return resultaat;
-        case "help": return "Deze actie wordt nog niet ondersteund.";
+        case "help": const puzzel2 = escapeRoom.puzzels.find(
+                            puzzel => puzzel.naam === actie.doel);
+                        if(!puzzel2) {
+                            return "Deze puzzel bestaat niet.";
+                        }
+                        return "Hint gevonden.";
         case "nieuw-spel": startNieuwSpel(gameState, escapeRoom);
                            return "Er is een nieuw spel gestart.";
         default: return "Onbekende actie."
