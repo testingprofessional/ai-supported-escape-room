@@ -46,6 +46,10 @@ export function startNieuwSpel(gameState: GameState, escapeRoom: EscapeRoom): vo
     escapeRoom.puzzels.forEach(puzzel => puzzel.opgelost = false);
 }
 
+export function magHintOpvragen(puzzel: Puzzle): boolean {
+    return !puzzel.opgelost;
+}
+
 export function verwerkActie(actie: PlayerAction, escapeRoom: EscapeRoom, gameState: GameState): string {
     if(gameState.ontsnapt && actie.type !== 'nieuw-spel') {
         return "Je bent al ontsnapt. Het spel is afgelopen.";
@@ -86,6 +90,9 @@ export function verwerkActie(actie: PlayerAction, escapeRoom: EscapeRoom, gameSt
                             puzzel => puzzel.naam === actie.doel);
                         if(!puzzel2) {
                             return "Deze puzzel bestaat niet.";
+                        }
+                        if(puzzel2.opgelost) {
+                            return "Deze puzzel is al opgelost."
                         }
                         return "Hint gevonden.";
         case "nieuw-spel": startNieuwSpel(gameState, escapeRoom);

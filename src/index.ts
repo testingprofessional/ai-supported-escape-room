@@ -1,7 +1,7 @@
 import type { EscapeRoom } from './models/room.js';
 import type { GameState } from './models/game-state.js';
 import { beschrijfKamer } from './ai/room-narrator.js';
-import { verwerkActie } from './game/game-engine.js';
+import { verwerkActie, magHintOpvragen } from './game/game-engine.js';
 import type { PlayerAction } from './models/action.js';
 import { genereerHint } from './ai/hint-generator.js';
 
@@ -39,6 +39,23 @@ async function verwerkSpelerActie(actie: PlayerAction) {
             }
         }
         console.log(openingsBeschrijving);
+    } else if(actie.type === 'help') {
+        const puzzel = escapeRoom.puzzels.find(
+                                    puzzel => puzzel.naam === actie.doel);
+                                if(!puzzel) {
+                                    console.log("Deze puzzel bestaat niet.");
+                                    return;
+                                }
+                                if(!magHintOpvragen(puzzel)) {
+                                    console.log("Deze puzzel is al opgelost.");
+                                    return;
+                                }
+                                try {
+                                    const hint = await genereerHint(puzzel);
+                                    console.log(hint);
+                                } catch {
+                                    console.log("Er is geen hint beschikbaar voor deze puzzel.");
+                                }
     } else {
         const resultaat = verwerkActie(actie, escapeRoom, gameState);
         console.log(resultaat);
@@ -53,12 +70,13 @@ async function startSpel(actie: PlayerAction) {
 }
 
 async function main() {
-    await startSpel({type: 'kijk', doel: ''});
-    await verwerkSpelerActie({type: 'inventaris', doel: ''});
-    const hint = await genereerHint(escapeRoom.puzzels[0]!);
-    console.log(hint);
+    //await startSpel({type: 'kijk', doel: ''});
+    //await verwerkSpelerActie({type: 'inventaris', doel: ''});
+    //const hint = await genereerHint(escapeRoom.puzzels[0]!);
+    //console.log(hint);
     await verwerkSpelerActie({type: 'help', doel: 'Cijfercode'});
     await verwerkSpelerActie({type: 'help', doel: 'Bestaat_niet'});
+    await verwerkSpelerActie({type: 'help', doel: 'Verborgen schakelaar'});
 }
 
 main();
