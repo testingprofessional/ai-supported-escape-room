@@ -4,6 +4,13 @@ import { beschrijfKamer } from './ai/room-narrator.js';
 import { verwerkActie } from './game/game-engine.js';
 import type { PlayerAction } from './models/action.js';
 
+let openingsBeschrijving = '';
+
+const gameState: GameState = {
+    inventaris: [],
+    ontsnapt: false
+}
+
 const escapeRoom: EscapeRoom = {
     naam: 'De Vergeten Werkkamer',
     beschrijving: 'Je zit opgesloten in een oude werkkamer. Vind een manier om te ontsnappen.',
@@ -18,26 +25,32 @@ const escapeRoom: EscapeRoom = {
                opgelost: false}]
 };
 
-const gameState: GameState = {
-    inventaris: [],
-    ontsnapt: false
-}
-
-let openingsBeschrijving = '';
-
-async function startSpel(actie: PlayerAction) {
-    openingsBeschrijving = await beschrijfKamer(escapeRoom);
-
-    const resultaat = verwerkActie(actie, escapeRoom, gameState);
-
+async function verwerkSpelerActie(actie: PlayerAction) {
     if(actie.type === 'kijk') {
+        if(openingsBeschrijving === '') {
+            openingsBeschrijving = await beschrijfKamer(escapeRoom);
+        }
         console.log(openingsBeschrijving);
     } else {
+        const resultaat = verwerkActie(actie, escapeRoom, gameState);
         console.log(resultaat);
     }
 }
 
-startSpel({type: 'inventaris', doel: ''});
+async function startSpel(actie: PlayerAction) {
+    if(openingsBeschrijving === '') {
+        openingsBeschrijving = await beschrijfKamer(escapeRoom);
+    }
+    console.log(openingsBeschrijving);
+}
+
+async function main() {
+    await startSpel({type: 'kijk', doel: ''});
+    await startSpel({type: 'kijk', doel: ''});
+    await verwerkSpelerActie({type: 'inventaris', doel: ''});
+}
+
+main();
 
 
 
