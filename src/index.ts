@@ -4,6 +4,12 @@ import { beschrijfKamer } from './ai/room-narrator.js';
 import { verwerkActie, magHintOpvragen } from './game/game-engine.js';
 import type { PlayerAction } from './models/action.js';
 import { genereerHint } from './ai/hint-generator.js';
+import { createInterface } from 'node:readline/promises';
+
+const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 
 let openingsBeschrijving = '';
 
@@ -41,7 +47,7 @@ async function verwerkSpelerActie(actie: PlayerAction) {
         console.log(openingsBeschrijving);
     } else if(actie.type === 'help') {
         const puzzel = escapeRoom.puzzels.find(
-                                    puzzel => puzzel.naam === actie.doel);
+                                    puzzel => puzzel.naam.toLowerCase() === actie.doel.toLowerCase());
                                 if(!puzzel) {
                                     console.log("Deze puzzel bestaat niet.");
                                     return;
@@ -70,13 +76,52 @@ async function startSpel(actie: PlayerAction) {
 }
 
 async function main() {
-    //await startSpel({type: 'kijk', doel: ''});
-    //await verwerkSpelerActie({type: 'inventaris', doel: ''});
-    //const hint = await genereerHint(escapeRoom.puzzels[0]!);
-    //console.log(hint);
-    await verwerkSpelerActie({type: 'help', doel: 'Cijfercode'});
-    await verwerkSpelerActie({type: 'help', doel: 'Bestaat_niet'});
-    await verwerkSpelerActie({type: 'help', doel: 'Verborgen schakelaar'});
+    while(true) {
+        const invoer = await rl.question("Escape Room > ");
+
+        const onderdelen = invoer.split(" ");
+        const commando = onderdelen[0]!.toLowerCase();
+        const antwoord = onderdelen[2];
+
+        if(commando === "pak") {
+            await verwerkSpelerActie({type: commando, doel: onderdelen[1]!})
+        } else if(commando === "los-op") {
+            const doelOnderdelen = onderdelen.slice(1, -1);
+            const doel = doelOnderdelen.join(" ");
+            await verwerkSpelerActie({type: commando, doel: doel, antwoord: onderdelen[onderdelen.length - 1]!});
+        } else if (commando === "stop") {
+            break;
+        } else if (commando === "kijk") {
+            await verwerkSpelerActie({
+                type: "kijk",
+                doel: ""
+            });
+        } else if (commando === "inventaris") {
+            await verwerkSpelerActie({
+                type: "inventaris",
+                doel: ""
+            });
+        } else if (commando === "help") {
+            const doelOnderdelen = onderdelen.slice(1);
+            const doel = doelOnderdelen.join(" ");
+            await verwerkSpelerActie({type: commando, doel: doel});
+        } else if (commando === "info") {
+            console.log("Mogelijke commando's");
+            console.log("_____________________");
+            console.log("kijk: Bekijk de kamer");
+            console.log("inventaris: Bekijk je verzamelde voorwerpen");
+            console.log("pak <voorwerp>: Pak een voorwerp op");
+            console.log("los-op <puzzel> <antwoord>: Probeer een puzzel op te lossen");
+            console.log("help <puzzel>: Vraag een hint voor een puzzel");
+            console.log("nieuw-spel: Start een nieuw spel");
+            console.log("stop: Beëindig het spel");
+            console.log("info: Toon deze informatie");
+        } else {
+            console.log("Het commando is onbekend");
+            console.log("Type 'info' voor meer informatie over de mogelijke commando's.");
+        }
+    }
+    rl.close();
 }
 
 main();

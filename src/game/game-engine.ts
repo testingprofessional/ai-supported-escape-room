@@ -4,14 +4,18 @@ import type { Puzzle } from '../models/puzzle.js';
 import type { PlayerAction } from '../models/action.js';
 
 export function pakVoorwerp(voorwerp: string, escapeRoom: EscapeRoom, gameState: GameState): boolean {
-    if(!escapeRoom.voorwerpen.includes(voorwerp)) {
+    if(!escapeRoom.voorwerpen.some(item => item.toLowerCase() === voorwerp.toLowerCase())) {
         return false; 
     } 
-    if(gameState.inventaris.includes(voorwerp)) {
+    if(gameState.inventaris.some(item => item.toLowerCase() === voorwerp.toLowerCase())) {
         return false;
     }
-    gameState.inventaris.push(voorwerp);
-    return true;
+    const gevondenVoorwerp = escapeRoom.voorwerpen.find(item => item.toLowerCase() === voorwerp.toLowerCase())
+    if(gevondenVoorwerp !== undefined) {
+        gameState.inventaris.push(gevondenVoorwerp!);
+        return true;
+    }
+    return false;;
 }
 
 export function losPuzzelOp(puzzel: Puzzle, antwoord: string): string {
@@ -71,7 +75,7 @@ export function verwerkActie(actie: PlayerAction, escapeRoom: EscapeRoom, gameSt
                         }
                         return "Je kunt dit voorwerp niet oppakken."
         case "los-op": const puzzel = escapeRoom.puzzels.find(
-                            puzzel => puzzel.naam === actie.doel);
+                            puzzel => puzzel.naam.toLowerCase() === actie.doel.toLowerCase());
                         if(!puzzel) {
                             return "Deze puzzel bestaat niet.";
                         }
@@ -87,7 +91,7 @@ export function verwerkActie(actie: PlayerAction, escapeRoom: EscapeRoom, gameSt
                         }
                         return resultaat;
         case "help": const puzzel2 = escapeRoom.puzzels.find(
-                            puzzel => puzzel.naam === actie.doel);
+                            puzzel => puzzel.naam.toLowerCase() === actie.doel.toLowerCase());
                         if(!puzzel2) {
                             return "Deze puzzel bestaat niet.";
                         }

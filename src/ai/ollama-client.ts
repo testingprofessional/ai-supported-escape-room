@@ -27,8 +27,8 @@ export async function vraagAanAI(prompt: string): Promise<string> {
 
     const tokensPerSeconde = data.eval_count / (data.eval_duration / 1_000_000_000);
 
-    console.log(`Gegenereerd: ${data.eval_count} tokens`);
-    console.log(`Generatiesnelheid: ${tokensPerSeconde.toFixed(2)} tokens/seconde`);
+    //console.log(`Gegenereerd: ${data.eval_count} tokens`);
+    //console.log(`Generatiesnelheid: ${tokensPerSeconde.toFixed(2)} tokens/seconde`);
 
     if (!data.response.trim()) {
         throw new Error('Ollama heeft een leeg antwoord teruggegeven.');
